@@ -66,6 +66,10 @@
             "Illuminate\\Foundation\\ComposerScripts::postUpdate",
             "@php artisan ide-helper:models",
             "@php artisan ide-helper:generate"
-        ]
+        ],
+        "test": "vendor/bin/phpunit"
+    },
+    "scripts-descriptions": {
+        "test": "Run all tests"
     }
 }

@@ -31,7 +31,9 @@ class GenderController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, $this->rules);
-        return Gender::create($request->all());
+        $gender = Gender::create($request->all());
+        $gender->refresh();
+        return $gender;
     }
 
     /**
