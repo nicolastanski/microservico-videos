@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Stubs\Modes;
+namespace Tests\Stubs\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
@@ -8,7 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 class CategoryStub extends Model
 {
     protected $table = 'category_stubs';
-    protected $fillanler = ['name', 'description'];
+    protected $fillable = ['name', 'description'];
 
     public static function createTable()
     {
