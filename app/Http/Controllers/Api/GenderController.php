@@ -2,74 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Gender;
-use Illuminate\Http\Request;
 
-class GenderController extends Controller
+class GenderController extends BasicCrudController
 {
     private $rules = [
         'name' => 'required|max:255',
         'is_active' => 'boolean'
     ];
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    protected function model()
     {
-        return Gender::all();
+        return Gender::class;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    protected function rulesStore()
     {
-        $this->validate($request, $this->rules);
-        $gender = Gender::create($request->all());
-        $gender->refresh();
-        return $gender;
+        return $this->rules;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Gender  $gender
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Gender $gender)
+    protected function rulesUpdate()
     {
-        return $gender;
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Gender  $gender
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Gender $gender)
-    {
-        $this->validate($request, $this->rules);
-        $gender->update($request->all());
-        return $gender;
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Gender  $gender
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Gender $gender)
-    {
-        $gender->delete();
-        return response()->noContent();
+        return $this->rules;
     }
 }

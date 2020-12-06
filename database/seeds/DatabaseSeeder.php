@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CastMember;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,5 +14,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(CategoriesTableSeeder::class);
         $this->call(GenderTableSeeder::class);
+        $this->call(CastMember::class);
     }
 }
