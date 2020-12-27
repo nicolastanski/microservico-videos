@@ -2,16 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Gender;
+use App\Http\Controllers\Api\BasicCrudController;
+use App\Models\Video;
 use Illuminate\Http\Request;
 
-class GenderController extends BasicCrudController
+class VideoController extends BasicCrudController
 {
-    private $rules = [
-        'name' => 'required|max:255',
-        'is_active' => 'boolean',
-        'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL'
-    ];
+    private $rules;
+
+    public function __construct()
+    {
+        $this->rules = [
+            'title' => 'required|max:255',
+            'description' => 'required',
+            'year_launched' => 'required|date_format:Y',
+            'opened' => 'boolean',
+            'rating' => 'required|in:' . implode(',', Video::RATING_LIST),
+            'duration' => 'required|integer',
+            'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL',
+            'genders_id' => 'required|array|exists:genders,id,deleted_at,NULL'
+        ];
+    }
 
     public function store(Request $request)
     {
@@ -43,11 +54,12 @@ class GenderController extends BasicCrudController
     protected function handleRelations($video, Request $request)
     {
         $video->categories()->sync($request->get('categories_id'));
+        $video->genders()->sync($request->get('genders_id'));
     }
 
     protected function model()
     {
-        return Gender::class;
+        return Video::class;
     }
 
     protected function rulesStore()
