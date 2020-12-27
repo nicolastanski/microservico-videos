@@ -18,4 +18,9 @@ class Category extends Model
         'id' => 'string',
         'is_active' => 'boolean'
     ];
+
+    public function genders()
+    {
+        return $this->belongsToMany(Gender::class);
+    }
 }
