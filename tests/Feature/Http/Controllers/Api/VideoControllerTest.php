@@ -241,6 +241,9 @@ class VideoControllerTest extends TestCase
             ->andReturn([]);
 
         $request = \Mockery::mock(Request::class);
+        $request->shouldReceive('get')
+            ->withAnyArgs()
+            ->andReturnNull();
 
         $controller->shouldReceive('handleRelations')
             ->once()
@@ -276,6 +279,9 @@ class VideoControllerTest extends TestCase
             ->andReturn([]);
 
         $request = \Mockery::mock(Request::class);
+        $request->shouldReceive('get')
+            ->withAnyArgs()
+            ->andReturnNull();
 
         $controller->shouldReceive('handleRelations')
             ->once()
@@ -290,6 +296,84 @@ class VideoControllerTest extends TestCase
         }
 
         $this->assertTrue($hasError);
+    }
+
+    public function testSyncCategories()
+    {
+        $categoriesId = factory(Category::class, 3)->create()->pluck('id')->toArray();
+        $gender = factory(Gender::class)->create();
+        $gender->categories()->sync($categoriesId);
+        $genderId = $gender->id;
+
+        $response = $this->json(
+            'POST',
+            $this->routeStore(),
+            $this->sendData + ['genders_id' => [$genderId], 'categories_id' => [$categoriesId[0]]]
+        );
+
+        $this->assertDatabaseHas('category_video', [
+            'category_id' => $categoriesId[0],
+            'video_id' => $response->json('id')
+        ]);
+
+        $response = $this->json(
+            'PUT',
+            route('videos.update', ['video' => $response->json('id')]),
+            $this->sendData + ['genders_id' => [$genderId], 'categories_id' => [$categoriesId[1], $categoriesId[2]]]
+        );
+
+        $this->assertDatabaseMissing('category_video', [
+            'category_id' => $categoriesId[0],
+            'video_id' => $response->json('id')
+        ]);
+        $this->assertDatabaseHas('category_video', [
+            'category_id' => $categoriesId[1],
+            'video_id' => $response->json('id')
+        ]);
+        $this->assertDatabaseHas('category_video', [
+            'category_id' => $categoriesId[2],
+            'video_id' => $response->json('id')
+        ]);
+    }
+
+    public function testSyncGenders()
+    {
+        $genders = factory(Gender::class, 3)->create();
+        $gendersId = $genders->pluck('id')->toArray();
+        $categoryId = factory(Category::class)->create()->id;
+        $genders->each(function ($gender) use ($categoryId) {
+            $gender->categories()->sync($categoryId);
+        });
+
+        $response = $this->json(
+            'POST',
+            $this->routeStore(),
+            $this->sendData + ['categories_id' => [$categoryId], 'genders_id' => [$gendersId[0]]]
+        );
+
+        $this->assertDatabaseHas('gender_video', [
+            'gender_id' => $gendersId[0],
+            'video_id' => $response->json('id')
+        ]);
+
+        $response = $this->json(
+            'PUT',
+            route('videos.update', ['video' => $response->json('id')]),
+            $this->sendData + ['categories_id' => [$categoryId], 'genders_id' => [$gendersId[1], $gendersId[2]]]
+        );
+
+        $this->assertDatabaseMissing('gender_video', [
+            'gender_id' => $gendersId[0],
+            'video_id' => $response->json('id')
+        ]);
+        $this->assertDatabaseHas('gender_video', [
+            'gender_id' => $gendersId[1],
+            'video_id' => $response->json('id')
+        ]);
+        $this->assertDatabaseHas('gender_video', [
+            'gender_id' => $gendersId[2],
+            'video_id' => $response->json('id')
+        ]);
     }
 
     public function testDestroy()
