@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Gender;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,12 @@ class GenderTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(Gender::class, 100)->create();
+        $categories = Category::all();
+        factory(Generator::class, 100)
+                ->create()
+            ->each(function (Gender $gender) use ($categories) {
+                $categoriesId = $categories->random(5)->pluck('id')->toArray();
+                $gender->categories()->attach($categoriesId);
+            });
     }
 }
