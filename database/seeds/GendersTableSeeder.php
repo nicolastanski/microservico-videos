@@ -14,7 +14,7 @@ class GenderTableSeeder extends Seeder
     public function run()
     {
         $categories = Category::all();
-        factory(Generator::class, 100)
+        factory(Gender::class, 100)
                 ->create()
             ->each(function (Gender $gender) use ($categories) {
                 $categoriesId = $categories->random(5)->pluck('id')->toArray();
