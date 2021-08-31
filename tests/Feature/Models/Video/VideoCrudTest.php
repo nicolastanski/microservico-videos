@@ -1,30 +1,24 @@
 <?php
 
-namespace Tests\Feature\Models;
+
+namespace Tests\Feature\Models\Video;
+
 
 use App\Models\Category;
 use App\Models\Gender;
 use App\Models\Video;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\TestCase;
 
-class VideoTest extends TestCase
+class VideoCrudTest extends BaseVideoTestCase
 {
-    use DatabaseMigrations;
-
-    private $sendData;
+    private $fileFields = [];
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sendData = [
-            'title' => 'title',
-             'description' => 'description',
-             'year_launched' => 2010,
-             'rating' => Video::RATING_LIST[0],
-             'duration' => 90,
-        ];
+        foreach (Video::$fileFields as $field) {
+            $fileFields[$field] = "$field.text";
+        }
     }
 
     public function testList()
@@ -45,6 +39,9 @@ class VideoTest extends TestCase
             'created_at',
             'updated_at',
             'deleted_at',
+            'thumb_file',
+            'banner_file',
+            'trailer_file',
             'video_file'
         ],
             $videoKeys
@@ -53,12 +50,12 @@ class VideoTest extends TestCase
 
     public function testCreateWithBasicFields()
     {
-        $video = Video::create($this->sendData);
+        $video = Video::create($this->sendData + $this->fileFields);
         $video->refresh();
 
         $this->assertEquals(36, strlen($video->id));
         $this->assertFalse($video->opened);
-        $this->assertDatabaseHas('videos', $this->sendData + ['opened' => false]);
+        $this->assertDatabaseHas('videos', $this->sendData + $this->fileFields + ['opened' => false]);
 
         $video = Video::create($this->sendData + ['opened' => true]);
         $this->assertTrue($video->opened);
@@ -70,9 +67,9 @@ class VideoTest extends TestCase
         $category = factory(Category::class)->create();
         $gender = factory(Gender::class)->create();
         $video = Video::create($this->sendData + [
-            'categories_id' => [$category->id],
-            'genders_id' => [$gender->id]
-        ]);
+                'categories_id' => [$category->id],
+                'genders_id' => [$gender->id]
+            ]);
 
         $this->assertHasCategory($video->id, $category->id);
         $this->assertHasGender($video->id, $gender->id);
@@ -83,9 +80,9 @@ class VideoTest extends TestCase
         $video = factory(Video::class)->create([
             'opened' => false
         ]);
-        $video->update($this->sendData);
+        $video->update($this->sendData +  $this->fileFields);
         $this->assertFalse($video->opened);
-        $this->assertDatabaseHas('videos', $this->sendData + ['opened' => false]);
+        $this->assertDatabaseHas('videos', $this->sendData +  $this->fileFields + ['opened' => false]);
 
         $video = factory(Video::class)->create([
             'opened' => false
@@ -101,9 +98,9 @@ class VideoTest extends TestCase
         $gender = factory(Gender::class)->create();
         $video = factory(Video::class)->create();
         $video->update($this->sendData + [
-            'categories_id' => [$category->id],
-            'genders_id' => [$gender->id]
-        ]);
+                'categories_id' => [$category->id],
+                'genders_id' => [$gender->id]
+            ]);
 
         $this->assertHasCategory($video->id, $category->id);
         $this->assertHasGender($video->id, $gender->id);
